@@ -1,0 +1,14 @@
+# .NET
+bin/
+obj/
+*.user
+*.db
+*.db-shm
+*.db-wal
+
+# Frontend
+abbreviation-quiz-client/node_modules/
+abbreviation-quiz-client/dist/
+
+# OS
+.DS_Store
