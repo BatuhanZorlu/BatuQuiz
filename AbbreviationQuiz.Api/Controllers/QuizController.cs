@@ -16,13 +16,18 @@ public class QuizController : ControllerBase
     }
 
     [HttpGet("random")]
-    public async Task<IActionResult> GetRandom()
+    public async Task<IActionResult> GetRandom([FromQuery] string? level)
     {
-        var count = await _db.Abbreviations.CountAsync();
-        if (count == 0) return NotFound("No abbreviations in database.");
+        var query = _db.Abbreviations.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(level))
+            query = query.Where(a => a.Level == level);
+
+        var count = await query.CountAsync();
+        if (count == 0) return NotFound("No abbreviations found.");
 
         var skip = Random.Shared.Next(count);
-        var item = await _db.Abbreviations.Skip(skip).FirstAsync();
+        var item = await query.Skip(skip).FirstAsync();
         return Ok(item);
     }
 }

@@ -4,7 +4,14 @@ import type { Abbreviation } from "../api/client";
 
 type Status = "idle" | "correct" | "wrong";
 
+const LEVELS = ["Tümü", "Stajyer", "Junior", "Mid", "Senior"] as const;
+type Level = (typeof LEVELS)[number];
+const LEVEL_KEY = "quiz_level";
+
 export default function QuizPage() {
+  const [level, setLevel] = useState<Level>(
+    () => (localStorage.getItem(LEVEL_KEY) as Level) ?? "Tümü"
+  );
   const [question, setQuestion] = useState<Abbreviation | null>(null);
   const [answer, setAnswer] = useState("");
   const [status, setStatus] = useState<Status>("idle");
@@ -13,12 +20,12 @@ export default function QuizPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const loadNext = useCallback(async () => {
+  const loadNext = useCallback(async (selectedLevel: Level) => {
     setLoading(true);
     setStatus("idle");
     setAnswer("");
     try {
-      const q = await fetchRandom();
+      const q = await fetchRandom(selectedLevel === "Tümü" ? undefined : selectedLevel);
       setQuestion(q);
     } catch {
       setQuestion(null);
@@ -28,8 +35,8 @@ export default function QuizPage() {
   }, []);
 
   useEffect(() => {
-    loadNext();
-  }, [loadNext]);
+    loadNext(level);
+  }, [loadNext, level]);
 
   useEffect(() => {
     if (!loading && status === "idle") {
@@ -42,6 +49,14 @@ export default function QuizPage() {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, []);
+
+  const handleLevelChange = (l: Level) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    localStorage.setItem(LEVEL_KEY, l);
+    setLevel(l);
+    setScore({ correct: 0, total: 0 });
+    setStatus("idle");
+  };
 
   const submit = () => {
     if (!question || status !== "idle") return;
@@ -58,7 +73,7 @@ export default function QuizPage() {
     }));
 
     const delay = isCorrect ? 1200 : 2500;
-    timerRef.current = setTimeout(loadNext, delay);
+    timerRef.current = setTimeout(() => loadNext(level), delay);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -70,6 +85,18 @@ export default function QuizPage() {
 
   return (
     <div className="page quiz-page">
+      <div className="level-selector">
+        {LEVELS.map((l) => (
+          <button
+            key={l}
+            className={`level-pill${level === l ? " active" : ""}`}
+            onClick={() => handleLevelChange(l)}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
+
       <div className="score-bar">
         <span className="score-label">Skor</span>
         <span className="score-value">

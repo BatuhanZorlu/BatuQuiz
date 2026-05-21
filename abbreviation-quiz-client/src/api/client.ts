@@ -5,16 +5,19 @@ export interface Abbreviation {
   short: string;
   full: string;
   category?: string;
+  level: string;
 }
 
-export async function fetchRandom(): Promise<Abbreviation> {
-  const res = await fetch(`${BASE}/quiz/random`);
+export async function fetchRandom(level?: string): Promise<Abbreviation> {
+  const url = level ? `${BASE}/quiz/random?level=${encodeURIComponent(level)}` : `${BASE}/quiz/random`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch question");
   return res.json();
 }
 
-export async function fetchAll(): Promise<Abbreviation[]> {
-  const res = await fetch(`${BASE}/abbreviations`);
+export async function fetchAll(level?: string): Promise<Abbreviation[]> {
+  const url = level ? `${BASE}/abbreviations?level=${encodeURIComponent(level)}` : `${BASE}/abbreviations`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch abbreviations");
   return res.json();
 }

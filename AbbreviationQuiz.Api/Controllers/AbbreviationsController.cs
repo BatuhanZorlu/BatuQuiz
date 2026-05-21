@@ -17,9 +17,14 @@ public class AbbreviationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] string? level)
     {
-        var items = await _db.Abbreviations.OrderBy(a => a.Short).ToListAsync();
+        var query = _db.Abbreviations.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(level))
+            query = query.Where(a => a.Level == level);
+
+        var items = await query.OrderBy(a => a.Short).ToListAsync();
         return Ok(items);
     }
 
@@ -33,7 +38,8 @@ public class AbbreviationsController : ControllerBase
         {
             Short = dto.Short.Trim().ToUpper(),
             Full = dto.Full.Trim(),
-            Category = string.IsNullOrWhiteSpace(dto.Category) ? null : dto.Category.Trim()
+            Category = string.IsNullOrWhiteSpace(dto.Category) ? null : dto.Category.Trim(),
+            Level = string.IsNullOrWhiteSpace(dto.Level) ? "Junior" : dto.Level.Trim()
         };
 
         _db.Abbreviations.Add(item);
@@ -42,4 +48,4 @@ public class AbbreviationsController : ControllerBase
     }
 }
 
-public record CreateAbbreviationDto(string Short, string Full, string? Category);
+public record CreateAbbreviationDto(string Short, string Full, string? Category, string? Level);

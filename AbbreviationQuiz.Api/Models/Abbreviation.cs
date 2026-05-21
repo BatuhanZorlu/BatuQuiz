@@ -6,4 +6,5 @@ public class Abbreviation
     public string Short { get; set; } = string.Empty;
     public string Full { get; set; } = string.Empty;
     public string? Category { get; set; }
+    public string Level { get; set; } = "Junior";
 }
