@@ -5,10 +5,6 @@ import type { Abbreviation } from "../api/client";
 const DURATION = 60;
 const BEST_KEY = "race_best";
 const NAME_KEY = "race_player_name";
-const LEVEL_KEY = "race_level";
-
-const LEVELS = ["Tümü", "Stajyer", "Junior", "Mid", "Senior"] as const;
-type Level = (typeof LEVELS)[number];
 
 type Phase = "idle" | "playing" | "finished";
 type Status = "idle" | "correct" | "wrong";
@@ -33,9 +29,6 @@ interface Props {
 
 export default function RacePage({ onRacingChange }: Props) {
   const [phase, setPhase] = useState<Phase>("idle");
-  const [level, setLevel] = useState<Level>(
-    () => (localStorage.getItem(LEVEL_KEY) as Level) ?? "Tümü"
-  );
   const [playerName, setPlayerName] = useState(() => localStorage.getItem(NAME_KEY) ?? "");
   const [question, setQuestion] = useState<Abbreviation | null>(null);
   const [answer, setAnswer] = useState("");
@@ -50,19 +43,12 @@ export default function RacePage({ onRacingChange }: Props) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const levelRef = useRef<Level>(level);
-
-  useEffect(() => {
-    levelRef.current = level;
-  }, [level]);
-
   const loadQuestion = useCallback(async () => {
     setLoading(true);
     setAnswer("");
     setStatus("idle");
     try {
-      const l = levelRef.current;
-      const q = await fetchRandom(l === "Tümü" ? undefined : l);
+      const q = await fetchRandom();
       setQuestion(q);
     } finally {
       setLoading(false);
@@ -175,12 +161,7 @@ export default function RacePage({ onRacingChange }: Props) {
     if (e.key === "Enter") submit();
   };
 
-  const handleLevelChange = (l: Level) => {
-    localStorage.setItem(LEVEL_KEY, l);
-    setLevel(l);
-  };
-
-  const pct = (timeLeft / DURATION) * 100;
+const pct = (timeLeft / DURATION) * 100;
   const timerColor =
     timeLeft > 20 ? "var(--accent)" : timeLeft > 10 ? "#f59e0b" : "var(--wrong)";
 
@@ -194,18 +175,6 @@ export default function RacePage({ onRacingChange }: Props) {
             Süre dolmadan mümkün olduğunca çok kısaltmanın açılımını yaz.
             Sonuç skor tablosuna kaydedilecek.
           </p>
-
-          <div className="level-selector">
-            {LEVELS.map((l) => (
-              <button
-                key={l}
-                className={`level-pill${level === l ? " active" : ""}`}
-                onClick={() => handleLevelChange(l)}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
 
           <div className="rules-box">
             <p className="rules-title">📋 Kurallar</p>
