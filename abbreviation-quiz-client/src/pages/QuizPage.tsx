@@ -82,7 +82,12 @@ export default function QuizPage() {
   const submit = () => {
     if (!question || status !== "idle") return;
     const normalize = (s: string) =>
-      s.trim().toLowerCase().replace(/[-]/g, " ").replace(/\s+/g, " ");
+      s.trim().toLowerCase()
+        .replace(/['\u2018\u2019`]/g, "")
+        .replace(/[/\\]/g, " ")
+        .replace(/[-]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
     const trimmed = normalize(answer);
     if (!trimmed) return;
 
