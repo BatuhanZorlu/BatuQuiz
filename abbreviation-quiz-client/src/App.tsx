@@ -3,9 +3,10 @@ import QuizPage from "./pages/QuizPage";
 import AddPage from "./pages/AddPage";
 import RacePage from "./pages/RacePage";
 import ScoreboardPage from "./pages/ScoreboardPage";
+import LeanPage from "./pages/LeanPage";
 import "./index.css";
 
-type Tab = "quiz" | "race" | "scoreboard" | "add";
+type Tab = "quiz" | "race" | "scoreboard" | "lean" | "add";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("quiz");
@@ -45,6 +46,12 @@ export default function App() {
               🏆 Skor
             </button>
             <button
+              className={`tab-btn ${activeTab === "lean" ? "active" : ""} ${isRacing ? "locked" : ""}`}
+              onClick={() => switchTab("lean")}
+            >
+              🏭 Lean
+            </button>
+            <button
               className={`tab-btn ${activeTab === "add" ? "active" : ""} ${isRacing ? "locked" : ""}`}
               onClick={() => switchTab("add")}
             >
@@ -58,6 +65,7 @@ export default function App() {
         {activeTab === "quiz" && <QuizPage />}
         {activeTab === "race" && <RacePage onRacingChange={setIsRacing} />}
         {activeTab === "scoreboard" && <ScoreboardPage />}
+        {activeTab === "lean" && <LeanPage />}
         {activeTab === "add" && <AddPage />}
       </main>
     </div>

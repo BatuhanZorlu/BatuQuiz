@@ -9,4 +9,5 @@ public class AppDbContext : DbContext
 
     public DbSet<Abbreviation> Abbreviations => Set<Abbreviation>();
     public DbSet<Score> Scores => Set<Score>();
+    public DbSet<LeanTerm> LeanTerms => Set<LeanTerm>();
 }
